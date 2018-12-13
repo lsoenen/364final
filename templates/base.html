@@ -1,3 +1,9 @@
+{% if current_user.is_authenticated %}
+    <a href="{{ url_for('logout') }}">Sign Out {{current_user.username}}</a>
+{% else %}
+    <a href="{{ url_for('login') }}">Sign In</a>
+{% endif %}
+
 <h1> College Football Application </h1>
 <h3> Luke Soenen - SI364 Final Project </h3>
 
