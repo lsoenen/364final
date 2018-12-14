@@ -37,6 +37,9 @@ login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
+#attribution tables
+user_collection = db.Table('user_collection',db.Column('team_id', db.Integer, db.ForeignKey('teams.id')),db.Column('collection_id',db.Integer, db.ForeignKey('personalteams.id')))
+
 #models
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -44,7 +47,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(100), unique=True, index=True)
     email = db.Column(db.String(50), unique=True, index=True)
     password_hash = db.Column(db.String(100))
-    # favoritesID = db.Column(db.Integer, db.ForeignKey('favoriteteams.id'))
+    personal_teamsID = db.Column(db.Integer, db.ForeignKey('personalteams.id'))
 
     @property
     def password(self):
@@ -56,6 +59,35 @@ class User(UserMixin, db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class Team(db.Model):
+    __tablename__ = "teams"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    players = db.relationship('Player', backref='Player')
+
+
+class PersonalTeamCollection(db.Model):
+    __tablename__ = "personalteams"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    teams = db.relationship('Team', secondary=user_collection,backref=db.backref('personalteams',lazy='dynamic'))
+
+class Player(db.Model):
+    __tablename__ = "players"
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
+    position = db.Column(db.String)
+    team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
+
+
 
 #forms
 class RegistrationForm(FlaskForm):
@@ -80,6 +112,40 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Log In')
 
 
+class TeamForm(FlaskForm):
+    search = StringField("Enter a team abbreviation to see their roster: ", validators = [Required()])
+    submit = SubmitField('Submit')
+
+
+#helper functions
+
+def get_team_roster(team):
+    api_key = 'gmjs72z9r685mj339k2s3cs7'
+    base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
+    response = requests.get(base_url)
+    text = response.text
+    python_obj = json.loads(text)
+    objects = python_obj
+    team_name = str(objects['id'])
+    players = str(objects['players'])
+    player_first_name = str(objects['players'][0]['name_first'])
+    player_last_name = str(objects['players'][0]['name_last'])
+    player_position = str(objects['players'][0]['position'])
+
+
+
+def get_or_create_team(db_session, name):
+    team = db_session.query(Team).filter_by(name=name).first()
+    if team:
+        return team
+    else:
+        team = Team(name=name)
+        db_session.add(team)
+        db_session.commit()
+        return team
+
+
+
 #view functions
 @app.route('/',methods=["GET","POST"])
 def login():
@@ -88,7 +154,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('home'))
+            return redirect(request.args.get('next') or url_for('teamform'))
         flash('Invalid username or password.')
     return render_template('base.html',form=form)
 
@@ -111,6 +177,11 @@ def register():
     return render_template('register.html',form=form)
 
 
+@app.route('/team_form', methods=["GET", "POST"])
+def teamform():
+    pass
+    # form = TeamForm()
+    # if form.validate_on_submit():
 
 
 
