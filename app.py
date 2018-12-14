@@ -118,26 +118,16 @@ class TeamForm(FlaskForm):
 
 
 #helper functions
-
-# def get_team_data(team):
-    # api_key = 'gmjs72z9r685mj339k2s3cs7'
-    # base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
-    # response = requests.get(base_url)
-    # text = response.text
-    # python_obj = json.loads(text)
-    # team_name = str(python_obj['id'])
-    # return team_name
-
-    # players = str(python_obj['players'])
-    # for player in players:
-    #     player_first_name = str(python_obj['players'][0]['name_first'])
-    #     player_last_name = str(python_obj['players'][0]['name_last'])
-    #     player_position = str(python_obj['players'][0]['position'])
-
 def get_or_create_team(team):
     team_info = Team.query.filter_by(name=team).first()
     if team_info:
-        return team_info
+        player_lst = []
+        all_players = Player.query.all()
+        for player in all_players:
+            if player.team_id == team_info.id:
+                player_lst.append(player)
+        return render_template('roster.html', players = player_lst)
+
     else:
         api_key = 'gmjs72z9r685mj339k2s3cs7'
         base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
@@ -158,12 +148,13 @@ def get_or_create_team(team):
             db.session.add(player_info)
             db.session.commit()
 
-        # team_name = get_team_data(name)
-        # team_info = Team(name=team_name)
-        # print(team_info)
-        # db_session.add(team_info)
-        # db_session.commit()
-        # return team_info
+            player_lst = []
+            all_players = Player.query.all()
+            for player in all_players:
+                if player.team_id == team_info.id:
+                    player_lst.append(player)
+
+            return render_template('roster.html', players = player_lst)
 
 
 
@@ -203,6 +194,7 @@ def teamform():
     form = TeamForm()
     if form.validate_on_submit():
         team = get_or_create_team(team=form.search.data)
+        return team
     return render_template('teamform.html', form=form)
 
 
