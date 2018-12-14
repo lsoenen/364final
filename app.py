@@ -154,7 +154,26 @@ def get_or_create_team(team):
                 if player.team_id == team_info.id:
                     player_lst.append(player)
 
-            return render_template('roster.html', players = player_lst)
+        return render_template('roster.html', players = player_lst)
+
+def get_or_create_personalteams_list():
+    personalteams_collectionn = PersonalTeamCollection.query.filter_by(name, current_user, team_list=[])
+    if personalteams_collection:
+        return personalteams_collection
+    else:
+        personalteams_collection = PersonalTeamCollection(name=name, user_id=current_user, teams=team_list)
+        db.session.add(personalteams_collection)
+        db.session.commit()
+        return personalteams_collection
+
+def show_all_teams():
+    team_lst = []
+    all_teams = Team.query.all()
+    for team in all_teams:
+        team_lst.append(team)
+    return team_lst
+
+
 
 
 
@@ -190,12 +209,21 @@ def register():
 
 
 @app.route('/team_form', methods=["GET", "POST"])
+@login_required
 def teamform():
     form = TeamForm()
     if form.validate_on_submit():
         team = get_or_create_team(team=form.search.data)
         return team
     return render_template('teamform.html', form=form)
+
+@app.route('/all_teams', methods=["GET", "POST"])
+def allteams():
+    all_teams = show_all_teams()
+    return render_template('allteams.html', teams=all_teams)
+
+
+
 
 
 
