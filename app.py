@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 #imports for login management
 from flask_login import LoginManager, login_required, logout_user, login_user, UserMixin, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+
 
 
 #application configurations
@@ -119,30 +119,51 @@ class TeamForm(FlaskForm):
 
 #helper functions
 
-def get_team_roster(team):
-    api_key = 'gmjs72z9r685mj339k2s3cs7'
-    base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
-    response = requests.get(base_url)
-    text = response.text
-    python_obj = json.loads(text)
-    objects = python_obj
-    team_name = str(objects['id'])
-    players = str(objects['players'])
-    player_first_name = str(objects['players'][0]['name_first'])
-    player_last_name = str(objects['players'][0]['name_last'])
-    player_position = str(objects['players'][0]['position'])
+# def get_team_data(team):
+    # api_key = 'gmjs72z9r685mj339k2s3cs7'
+    # base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
+    # response = requests.get(base_url)
+    # text = response.text
+    # python_obj = json.loads(text)
+    # team_name = str(python_obj['id'])
+    # return team_name
 
+    # players = str(python_obj['players'])
+    # for player in players:
+    #     player_first_name = str(python_obj['players'][0]['name_first'])
+    #     player_last_name = str(python_obj['players'][0]['name_last'])
+    #     player_position = str(python_obj['players'][0]['position'])
 
-
-def get_or_create_team(db_session, name):
-    team = db_session.query(Team).filter_by(name=name).first()
-    if team:
-        return team
+def get_or_create_team(team):
+    team_info = Team.query.filter_by(name=team).first()
+    if team_info:
+        return team_info
     else:
-        team = Team(name=name)
-        db_session.add(team)
-        db_session.commit()
-        return team
+        api_key = 'gmjs72z9r685mj339k2s3cs7'
+        base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
+        response = requests.get(base_url)
+        text = response.text
+        python_obj = json.loads(text)
+        team_name = python_obj['id']
+        team_info = Team(name=team_name)
+        db.session.add(team_info)
+        db.session.commit()
+
+        players = python_obj['players']
+        for player in players:
+            player_first_name = player['name_first']
+            player_last_name = player['name_last']
+            player_position = player['position']
+            player_info = Player(first_name=player_first_name, last_name=player_last_name, position=player_position, team_id=team_info.id)
+            db.session.add(player_info)
+            db.session.commit()
+
+        # team_name = get_team_data(name)
+        # team_info = Team(name=team_name)
+        # print(team_info)
+        # db_session.add(team_info)
+        # db_session.commit()
+        # return team_info
 
 
 
@@ -163,7 +184,7 @@ def login():
 def logout():
     logout_user()
     flash('You have been logged out')
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/register',methods=["GET","POST"])
 def register():
@@ -179,9 +200,10 @@ def register():
 
 @app.route('/team_form', methods=["GET", "POST"])
 def teamform():
-    pass
-    # form = TeamForm()
-    # if form.validate_on_submit():
+    form = TeamForm()
+    if form.validate_on_submit():
+        team = get_or_create_team(team=form.search.data)
+    return render_template('teamform.html', form=form)
 
 
 

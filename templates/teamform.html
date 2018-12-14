@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block navigation %}
+ {{ super() }}
+{% endblock %}
+
+{% block main_content %}
+
+<h3> Team Entry </h3>
+
+<form method="POST">
+	{{ form.hidden_tag() }}
+	{{ form.search.label }} {{ form.search() }}
+	{{ form.submit.label }}{{ form.submit() }}
+</form>
+{% endblock %}
