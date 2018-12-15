@@ -116,8 +116,17 @@ class TeamForm(FlaskForm):
     search = StringField("Enter a team abbreviation to see their roster: ", validators = [Required()])
     submit = SubmitField('Submit')
 
+class PersonalTeamCollectionForm(FlaskForm):
+    name = StringField('Name your favorite team collection', validators=[Required()])
+    team_picks = SelectMultipleField('Teams to include')
+    submit = SubmitField("Create Collection")
+
 
 #helper functions
+def get_team_by_id(id):
+    t = Team.query.filter_by(id=id).first()
+    return t
+
 def get_or_create_team(team):
     team_info = Team.query.filter_by(name=team).first()
     if team_info:
@@ -166,16 +175,6 @@ def get_or_create_personalteams_list():
         db.session.commit()
         return personalteams_collection
 
-def show_all_teams():
-    team_lst = []
-    all_teams = Team.query.all()
-    for team in all_teams:
-        team_lst.append(team)
-    return team_lst
-
-
-
-
 
 #view functions
 @app.route('/',methods=["GET","POST"])
@@ -217,12 +216,23 @@ def teamform():
         return team
     return render_template('teamform.html', form=form)
 
-@app.route('/all_teams', methods=["GET", "POST"])
-def allteams():
-    all_teams = show_all_teams()
-    return render_template('allteams.html', teams=all_teams)
 
-
+@app.route('/create_favorite_teams', methods=["GET", "POST"])
+@login_required
+def createfavorites():
+    form = PersonalTeamCollectionForm()
+    teams = Team.query.all()
+    choices = [(t.id, t.name) for t in teams]
+    form.team_picks.choices = choices
+    if form.validate_on_submit():
+        all_teams = []
+        for team in form.team_picks.choices:
+            new_team = get_team_by_id(id=team[0])
+            all_teams.append(new_team)
+        get_or_create_personalteams_list(name=form.name.data, user_id=current_user, teams=all_teams)
+        return redirect(url_for('favorite_teams', form=form))
+    else:
+        return render_template('createfavorites.html', form=form)
 
 
 

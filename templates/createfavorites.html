@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block navigation %}
+ {{ super() }}
+{% endblock %}
+
+{% block main_content %}
+
+<h3> Select Your Favorite Teams </h3>
+
+<form action="" method="POST">
+	{{ form.hidden_tag() }}
+	{{ form.name.label }} {{ form.name() }}
+	{{ form.team_picks.label }} {{ form.team_picks() }}
+	{{ form.submit.label }}{{ form.submit() }}
+</form>
+
+{% endblock %}
