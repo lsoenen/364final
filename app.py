@@ -76,8 +76,8 @@ class PersonalTeamCollection(db.Model):
     __tablename__ = "personalteams"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    teams = db.relationship('Team', secondary=user_collection,backref=db.backref('personalteams',lazy='dynamic'))
+    user = db.relationship("User", backref="collection")
+    teams = db.relationship('Team', secondary=user_collection,backref=db.backref('personalteams',lazy='dynamic'),lazy='dynamic')
 
 class Player(db.Model):
     __tablename__ = "players"
@@ -165,15 +165,17 @@ def get_or_create_team(team):
 
         return render_template('roster.html', players = player_lst)
 
-def get_or_create_personalteams_list():
-    personalteams_collectionn = PersonalTeamCollection.query.filter_by(name, current_user, team_list=[])
-    if personalteams_collection:
-        return personalteams_collection
+def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
+    personal_teams_collection = db.session.query(PersonalTeamCollection).filter_by(name=name, user=current_user).first()
+    if personal_teams_collection:
+        return personal_teams_collection
     else:
-        personalteams_collection = PersonalTeamCollection(name=name, user_id=current_user, teams=team_list)
-        db.session.add(personalteams_collection)
+        personal_teams_collection = PersonalTeamCollection(name=name, user=current_user)
+        for team in team_list:
+            personalteams.teams.append(personal_teams_collection)
+        db.session.add(personal_teams_collection)
         db.session.commit()
-        return personalteams_collection
+        return personal_teams_collection
 
 
 #view functions
@@ -229,10 +231,17 @@ def createfavorites():
         for team in form.team_picks.choices:
             new_team = get_team_by_id(id=team[0])
             all_teams.append(new_team)
-        get_or_create_personalteams_list(name=form.name.data, user_id=current_user, teams=all_teams)
-        return redirect(url_for('favorite_teams', form=form))
+        get_or_create_personal_team_favorites(name=form.name.data, current_user=current_user, team_list=all_teams)
+        print(all_teams)
+        return redirect(url_for('personalcollection', form=form))
     else:
         return render_template('createfavorites.html', form=form)
+
+@app.route('/favorite_teams',methods=["GET","POST"])
+@login_required
+def personalcollection():
+    form = PersonalTeamCollectionForm()
+    return render_template('personalteams.html', form=form)
 
 
 
