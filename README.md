@@ -2,7 +2,7 @@
 
 Description:
 
-This application allows users to search for teams using the team search form. After searching for a team, the program returns the full roster for that team. The user can also use the create collection page to create a personalized collection of teams. This would be useful for people that want to organize teams by their conference. The users can also update the rank of the team depending on how well they are performing. They also have the option to delete one of the collections after it has been created.
+This application allows users to search for teams using the team search form. After searching for a team, the program returns the full roster for that team. The user can also use the create collection page to create a personalized collection of teams. This would be useful for people that want to organize teams into certain conferences. The users can also update the name of the collections/conferences that they created. Although the name changes after it is updated, the teams within the collections remain the same. Users also have the option to delete each of the collections that they created. If a user would like to add more teams to their collection that are not on the original list, they can use the team search for to find them. Teams must be searched using the official abbreviations which can be found here: "https://www.reddit.com/r/CFB/wiki/abbreviations"
 
 routes:
 
@@ -69,7 +69,7 @@ routes:
 
 **At least two custom validators for a field in a WTForm, NOT counting the custom validators included in the log in/auth code.**
 
-Include at least one way to update items saved in the database in the application (like in HW5).
+**Include at least one way to update items saved in the database in the application (like in HW5).**
 
 **Include at least one way to delete items saved in the database in the application (also like in HW5).**
 
