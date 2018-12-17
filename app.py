@@ -114,13 +114,21 @@ class LoginForm(FlaskForm):
 
 
 class TeamForm(FlaskForm):
-    search = StringField("Enter a team abbreviation to see their roster: ", validators = [Required()])
+    search = StringField("Enter a team's official abbreviation to see their roster ('BAMA', 'MICH', 'TEX'): ", validators = [Required()])
     submit = SubmitField('Submit')
+
+    def validate_search(self,field):
+        if " ' " in field.data:
+            raise ValidationError('Please use a correct abbreviation')
 
 class PersonalTeamCollectionForm(FlaskForm):
     name = StringField('Name your team collection', validators=[Required()])
     team_picks = SelectMultipleField('Teams to include', coerce=int)
     submit = SubmitField("Create Collection")
+
+    def validate_name(self,field):
+        if PersonalTeamCollection.query.filter_by(name=field.data).first():
+            raise ValidationError('Please enter a new collection name')
 
 class UpdateRankForm(FlaskForm):
     new_rank = StringField('What would you like to rank this team?', validators=[Required()])
@@ -177,7 +185,6 @@ def get_or_create_team(team):
 def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
     collection = current_user.personal_teams_collection.filter_by(name=name).first()
     if not collection:
-        print("Not collection")
         collection = PersonalTeamCollection(name=name)
         current_user.personal_teams_collection.append(collection)
         for team in team_list:
@@ -188,7 +195,13 @@ def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
     return collection
 
 
+
 #view functions
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
 @app.route('/',methods=["GET","POST"])
 def login():
     form = LoginForm()

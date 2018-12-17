@@ -14,15 +14,15 @@
 # At least one query of data using a .filter_by(... and show the results of that query directly (e.g. by sending the results to a template) or indirectly (e.g. using the results of the query to make a request to an API or save other data to a table).
 # At least one helper function that is not a get_or_create function should be defined and invoked in the application.
 # At least two get_or_create functions should be defined and invoked in the application (such that information can be saved without being duplicated / encountering errors).
-At least one error handler for a 404 error and a corresponding template.
-Include at least 4 template .html files in addition to the error handling template files.
+# At least one error handler for a 404 error and a corresponding template.
+# Include at least 4 template .html files in addition to the error handling template files.
 # At least one Jinja template for loop and at least two Jinja template conditionals should occur amongst the templates.
 # At least one request to a REST API that is based on data submitted in a WTForm OR data accessed in another way online (e.g. scraping with BeautifulSoup that does accord with other involved sites' Terms of Service, etc).
 # Your application should use data from a REST API or other source such that the application processes the data in some way and saves some information that came from the source to the database (in some way).
 # At least one WTForm that sends data with a GET request to a new page.
 At least one WTForm that sends data with a POST request to the same page. (NOT counting the login or registration forms provided for you in class.)
 # At least one WTForm that sends data with a POST request to a new page. (NOT counting the login or registration forms provided for you in class.)
-At least two custom validators for a field in a WTForm, NOT counting the custom validators included in the log in/auth code.
+# At least two custom validators for a field in a WTForm, NOT counting the custom validators included in the log in/auth code.
 Include at least one way to update items saved in the database in the application (like in HW5).
 # Include at least one way to delete items saved in the database in the application (also like in HW5).
 # Include at least one use of redirect.
