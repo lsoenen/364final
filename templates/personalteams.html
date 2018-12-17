@@ -10,7 +10,9 @@
 
 <ul>
 {% for t in collections %}
-    <li>{{ t.name }}</li>
+    <li>
+      <a href="{{ url_for('single_collection',id_num=t.id)}}"> {{ t.name }}</a>
+    </li>
     <form action = '/delete/{{t.id}}' method="POST">
       {{ form.submit() }}
     </form>

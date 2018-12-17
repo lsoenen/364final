@@ -118,7 +118,7 @@ class TeamForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class PersonalTeamCollectionForm(FlaskForm):
-    name = StringField('Name your favorite team collection', validators=[Required()])
+    name = StringField('Name your team collection', validators=[Required()])
     team_picks = SelectMultipleField('Teams to include', coerce=int)
     submit = SubmitField("Create Collection")
 
@@ -130,11 +130,12 @@ class DeleteButtonForm(FlaskForm):
     submit = SubmitField('Delete')
 
 
-#helper functions
+#helper function
 def get_team_by_id(id):
     t = Team.query.filter_by(id=id).first()
     return t
 
+#get or create
 def get_or_create_team(team):
     team_info = Team.query.filter_by(name=team).first()
     if team_info:
@@ -252,9 +253,16 @@ def allcollections():
     user_collection = current_user.personal_teams_collection
     return render_template('personalteams.html', collections=user_collection, form = form)
 
-@app.route('/delete/<lst>',methods=["GET","POST"])
-def delete(lst):
-    q = PersonalTeamCollection.query.filter_by(id=lst).first()
+@app.route('/collection/<id_num>',methods=["GET","POST"])
+def single_collection(id_num):
+    id_num = int(id_num)
+    collection = PersonalTeamCollection.query.filter_by(id=id_num).first()
+    teams = collection.teams.all()
+    return render_template('collection.html',collection=collection,teams=teams)
+
+@app.route('/delete/<col>',methods=["GET","POST"])
+def delete(col):
+    q = PersonalTeamCollection.query.filter_by(id=col).first()
     flash('Succesfully deleted' + q.name)
     db.session.delete(q)
     db.session.commit()

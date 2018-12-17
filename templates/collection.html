@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block navigation %}
+ {{ super() }}
+{% endblock %}
+
+{% block main_content %}
+
+<h3>{{ collection.name }}</h3>
+
+{% for t in teams %}
+      <li>{{ t.name }}</li>
+      <br>
+{% endfor %}
+
+
+{% endblock %}
