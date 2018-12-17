@@ -130,8 +130,8 @@ class PersonalTeamCollectionForm(FlaskForm):
         if PersonalTeamCollection.query.filter_by(name=field.data).first():
             raise ValidationError('Please enter a new collection name')
 
-class UpdateRankForm(FlaskForm):
-    new_rank = StringField('What would you like to rank this team?', validators=[Required()])
+class UpdateNameForm(FlaskForm):
+    new_name = StringField('Change name of this group to: ', validators=[Required()])
     submit = SubmitField("Update")
 
 class DeleteButtonForm(FlaskForm):
@@ -188,7 +188,7 @@ def get_or_create_team(team):
 def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
     collection = current_user.personal_teams_collection.filter_by(name=name).first()
     if not collection:
-        collection = PersonalTeamCollection(name=name)
+        collection = PersonalTeamCollection(name=name, teams=team_list)
         current_user.personal_teams_collection.append(collection)
         for team in team_list:
             collection.teams.append(team)
@@ -200,9 +200,9 @@ def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
 
 
 #view functions
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     return render_template('404.html'), 404
 
 
 @app.route('/',methods=["GET","POST"])
@@ -254,20 +254,20 @@ def createfavorites():
     form.team_picks.choices = choices
     all_teams = []
     if form.validate_on_submit():
-        for team in form.team_picks.choices:
-            new_team = get_team_by_id(id=team[0])
-            all_teams.append(new_team)
-        print(all_teams)
-        get_or_create_personal_team_favorites(name=form.name.data, current_user=current_user, team_list=all_teams)
-        return redirect(url_for('allcollections', form=form, all_teams=all_teams))
+        team_picks = form.team_picks.data
+        team_list = [get_team_by_id(id) for id in team_picks]
+        get_or_create_personal_team_favorites(name = form.name.data, current_user=current_user, team_list=team_list)
+        return redirect(url_for('allcollections'))
     return render_template('createfavorites.html', form=form)
+
 
 @app.route('/favorite_teams',methods=["GET","POST"])
 @login_required
 def allcollections():
     form = DeleteButtonForm()
+    form2 = UpdateNameForm()
     user_collection = current_user.personal_teams_collection
-    return render_template('personalteams.html', collections=user_collection, form = form)
+    return render_template('personalteams.html', collections=user_collection, form = form, form2=form2)
 
 @app.route('/collection/<id_num>',methods=["GET","POST"])
 def single_collection(id_num):
@@ -284,6 +284,18 @@ def delete(col):
     db.session.commit()
     return redirect(url_for('allcollections'))
 
+@app.route('/update/<col>', methods=["GET","POST"])
+def update(col):
+    q = PersonalTeamCollection.query.filter_by(id=col).first()
+    form = UpdateNameForm()
+    # if form.validate_on_submit():
+    new_name = form.new_name.data
+    print(new_name)
+    q.name = new_name
+    db.session.add(q)
+    db.session.commit()
+    return redirect(url_for('allcollections'))
+    return render_template('personalteams.html', form2=form, col=col)
 
 
 

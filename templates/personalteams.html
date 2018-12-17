@@ -13,11 +13,16 @@
     <li>
       <a href="{{ url_for('single_collection',id_num=t.id)}}"> {{ t.name }}</a>
     </li>
+
     <form action = '/delete/{{t.id}}' method="POST">
       {{ form.submit() }}
     </form>
 
+    <form method = 'POST' action="/update/{{t.id}}" >
+      {{ form2.new_name.label}} {{form2.new_name()}}
+      {{ form2.submit () }}
+    </form>
+
 {% endfor %}
-</ul>
 
 {% endblock %}
