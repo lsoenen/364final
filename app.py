@@ -122,6 +122,13 @@ class PersonalTeamCollectionForm(FlaskForm):
     team_picks = SelectMultipleField('Teams to include', coerce=int)
     submit = SubmitField("Create Collection")
 
+class UpdateRankForm(FlaskForm):
+    new_rank = StringField('What would you like to rank this team?', validators=[Required()])
+    submit = SubmitField("Update")
+
+class DeleteButtonForm(FlaskForm):
+    submit = SubmitField('Delete')
+
 
 #helper functions
 def get_team_by_id(id):
@@ -235,14 +242,23 @@ def createfavorites():
             all_teams.append(new_team)
         print(all_teams)
         get_or_create_personal_team_favorites(name=form.name.data, current_user=current_user, team_list=all_teams)
-        return redirect(url_for('personalcollection', form=form, all_teams=all_teams))
+        return redirect(url_for('allcollections', form=form, all_teams=all_teams))
     return render_template('createfavorites.html', form=form)
 
 @app.route('/favorite_teams',methods=["GET","POST"])
 @login_required
-def personalcollection():
-    form = PersonalTeamCollectionForm()
-    return render_template('personalteams.html', form=form)
+def allcollections():
+    form = DeleteButtonForm()
+    user_collection = current_user.personal_teams_collection
+    return render_template('personalteams.html', collections=user_collection, form = form)
+
+@app.route('/delete/<lst>',methods=["GET","POST"])
+def delete(lst):
+    q = PersonalTeamCollection.query.filter_by(id=lst).first()
+    flash('Succesfully deleted' + q.name)
+    db.session.delete(q)
+    db.session.commit()
+    return redirect(url_for('allcollections'))
 
 
 

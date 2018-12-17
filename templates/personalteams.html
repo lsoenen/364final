@@ -6,11 +6,15 @@
 
 {% block main_content %}
 
-<h3> Here are your favorite teams </h3>
+<h3> Here are your collections </h3>
 
 <ul>
-{% for t in all_teams %}
+{% for t in collections %}
     <li>{{ t.name }}</li>
+    <form action = '/delete/{{t.id}}' method="POST">
+      {{ form.submit() }}
+    </form>
+
 {% endfor %}
 </ul>
 
