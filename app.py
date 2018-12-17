@@ -145,6 +145,7 @@ def get_team_by_id(id):
 
 #get or create
 def get_or_create_team(team):
+    form = TeamForm()
     team_info = Team.query.filter_by(name=team).first()
     if team_info:
         player_lst = []
@@ -152,9 +153,11 @@ def get_or_create_team(team):
         for player in all_players:
             if player.team_id == team_info.id:
                 player_lst.append(player)
-        return render_template('roster.html', players = player_lst)
+
+        return render_template('teamform.html', form = form, players = player_lst)
 
     else:
+        form = TeamForm()
         api_key = 'gmjs72z9r685mj339k2s3cs7'
         base_url = "http://api.sportradar.us/ncaafb-t1/teams/" + team + "/roster.json?api_key=" + api_key
         response = requests.get(base_url)
@@ -180,7 +183,7 @@ def get_or_create_team(team):
                 if player.team_id == team_info.id:
                     player_lst.append(player)
 
-        return render_template('roster.html', players = player_lst)
+        return render_template('teamform.html', form = form, players = player_lst)
 
 def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
     collection = current_user.personal_teams_collection.filter_by(name=name).first()
