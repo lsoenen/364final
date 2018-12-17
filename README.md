@@ -1,4 +1,18 @@
 **364 Final**
+
+Description: This application allows users to search for teams using the team search form. After searching for a team, the program returns the full roster for that team. The user can also use the create collection page to create a personalized collection of teams. This would be useful for people that want to organize teams by their conference. The users can also update the rank of the team depending on how well they are performing. They also have the option to delete one of the collections after it has been created.
+
+routes:
+'/' --> base.html
+'/logout' --> base.html
+'/register' --> register.html
+'/team_form' --> roster.html
+'/create_favorite_teams' --> personalteams.html
+'/favorite_teams' --> collection.html
+'/collection/<id_num>'
+'/delete/<col>'
+
+
 **A user should be able to load http://localhost:5000 and see the first page they ought to see on the application.**
 
 **Include navigation in base.html with links (using a href tags) that lead to every other page in the application that a user should be able to click on. (e.g. in the lecture examples from the Feb 9 lecture, like this )**
@@ -56,6 +70,9 @@ Include at least one way to update items saved in the database in the applicatio
 **Have at least 5 view functions that are not included with the code we have provided. (But you may have more!)**
 
 Additional Requirements for extra points -- an app with extra functionality!
+
 (100 points) Include a use of an AJAX request in your application that accesses and displays useful (for use of your application) data.
+
 (100 points) Create, run, and commit at least one migration. (We'll see this from the files generated and can check the history)
+
 (100 points) Deploy the application to the internet (Heroku) — only counts if it is up when we grade / you can show proof it is up at a URL and tell us what the URL is in the README. (Heroku deployment as we taught you is 100% free so this will not cost anything.)
