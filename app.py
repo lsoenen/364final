@@ -47,7 +47,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(100), unique=True, index=True)
     email = db.Column(db.String(50), unique=True, index=True)
     password_hash = db.Column(db.String(100))
-    personal_teamsID = db.Column(db.Integer, db.ForeignKey('personalteams.id'))
+    personal_teams_collection = db.relationship('PersonalTeamCollection', backref = 'users', lazy='dynamic')
 
     @property
     def password(self):
@@ -76,8 +76,9 @@ class PersonalTeamCollection(db.Model):
     __tablename__ = "personalteams"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    user = db.relationship("User", backref="collection")
-    teams = db.relationship('Team', secondary=user_collection,backref=db.backref('personalteams',lazy='dynamic'),lazy='dynamic')
+    user = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # user = db.relationship("User", backref="personalteams")
+    teams = db.relationship('Team', secondary=user_collection, backref=db.backref('personalteams',lazy='dynamic'),lazy='dynamic')
 
 class Player(db.Model):
     __tablename__ = "players"
@@ -118,7 +119,7 @@ class TeamForm(FlaskForm):
 
 class PersonalTeamCollectionForm(FlaskForm):
     name = StringField('Name your favorite team collection', validators=[Required()])
-    team_picks = SelectMultipleField('Teams to include')
+    team_picks = SelectMultipleField('Teams to include', coerce=int)
     submit = SubmitField("Create Collection")
 
 
@@ -166,16 +167,17 @@ def get_or_create_team(team):
         return render_template('roster.html', players = player_lst)
 
 def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
-    personal_teams_collection = db.session.query(PersonalTeamCollection).filter_by(name=name, user=current_user).first()
-    if personal_teams_collection:
-        return personal_teams_collection
-    else:
-        personal_teams_collection = PersonalTeamCollection(name=name, user=current_user)
+    collection = current_user.personal_teams_collection.filter_by(name=name).first()
+    if not collection:
+        print("Not collection")
+        collection = PersonalTeamCollection(name=name)
+        current_user.personal_teams_collection.append(collection)
         for team in team_list:
-            personalteams.teams.append(personal_teams_collection)
-        db.session.add(personal_teams_collection)
+            collection.teams.append(team)
+        db.session.add(current_user)
+        db.session.add(collection)
         db.session.commit()
-        return personal_teams_collection
+    return collection
 
 
 #view functions
@@ -226,16 +228,15 @@ def createfavorites():
     teams = Team.query.all()
     choices = [(t.id, t.name) for t in teams]
     form.team_picks.choices = choices
+    all_teams = []
     if form.validate_on_submit():
-        all_teams = []
         for team in form.team_picks.choices:
             new_team = get_team_by_id(id=team[0])
             all_teams.append(new_team)
-        get_or_create_personal_team_favorites(name=form.name.data, current_user=current_user, team_list=all_teams)
         print(all_teams)
-        return redirect(url_for('personalcollection', form=form))
-    else:
-        return render_template('createfavorites.html', form=form)
+        get_or_create_personal_team_favorites(name=form.name.data, current_user=current_user, team_list=all_teams)
+        return redirect(url_for('personalcollection', form=form, all_teams=all_teams))
+    return render_template('createfavorites.html', form=form)
 
 @app.route('/favorite_teams',methods=["GET","POST"])
 @login_required
