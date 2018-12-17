@@ -1,15 +1,25 @@
 **364 Final**
 
-Description: This application allows users to search for teams using the team search form. After searching for a team, the program returns the full roster for that team. The user can also use the create collection page to create a personalized collection of teams. This would be useful for people that want to organize teams by their conference. The users can also update the rank of the team depending on how well they are performing. They also have the option to delete one of the collections after it has been created.
+Description:
+
+This application allows users to search for teams using the team search form. After searching for a team, the program returns the full roster for that team. The user can also use the create collection page to create a personalized collection of teams. This would be useful for people that want to organize teams by their conference. The users can also update the rank of the team depending on how well they are performing. They also have the option to delete one of the collections after it has been created.
 
 routes:
+
 '/' --> base.html
+
 '/logout' --> base.html
+
 '/register' --> register.html
+
 '/team_form' --> roster.html
+
 '/create_favorite_teams' --> personalteams.html
+
 '/favorite_teams' --> collection.html
+
 '/collection/<id_num>'
+
 '/delete/<col>'
 
 
