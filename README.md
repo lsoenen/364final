@@ -1,5 +1,4 @@
-# 364final
-
+**364 Final**
 ** A user should be able to load http://localhost:5000 and see the first page they ought to see on the application. **
 ** Include navigation in base.html with links (using a href tags) that lead to every other page in the application that a user should be able to click on. (e.g. in the lecture examples from the Feb 9 lecture, like this ) **
 ** Ensure that all templates in the application inherit (using template inheritance, with extends) from base.html and include at least one additional block. **
