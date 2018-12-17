@@ -199,10 +199,10 @@ def get_or_create_personal_team_favorites(name, current_user, team_list=[]):
 
 
 
-#view functions
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     return render_template('404.html'), 404
+view functions
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @app.route('/',methods=["GET","POST"])
@@ -236,7 +236,6 @@ def register():
 
 
 @app.route('/team_form', methods=["GET", "POST"])
-@login_required
 def teamform():
     form = TeamForm()
     if form.validate_on_submit():
@@ -288,7 +287,6 @@ def delete(col):
 def update(col):
     q = PersonalTeamCollection.query.filter_by(id=col).first()
     form = UpdateNameForm()
-    # if form.validate_on_submit():
     new_name = form.new_name.data
     print(new_name)
     q.name = new_name
